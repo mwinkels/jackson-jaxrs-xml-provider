@@ -34,7 +34,7 @@ public class TestRootType
         MediaType mt = MediaType.APPLICATION_JSON_TYPE;
         prov.writeTo(list, List.class, ref.getType(), new Annotation[0], mt, null, out);
 
-        String json = out.toString("UTF-8");
-        assertEquals("[{\"bean\":{\"a\":3}}]", json);
+        String xml = out.toString("UTF-8");
+        assertEquals("<List><bean><a>3</a></bean></List>", xml);
     }
 }

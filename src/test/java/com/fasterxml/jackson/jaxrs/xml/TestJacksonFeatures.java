@@ -56,16 +56,16 @@ public class TestJacksonFeatures extends JaxrsTestBase
         JacksonFeatures feats = m.getAnnotation(JacksonFeatures.class);
         assertNotNull(feats); // just a sanity check
 
-        // when wrapping enabled, we get:
+        // when (extra) wrapping enabled, we get:
         prov.writeTo(bean, bean.getClass(), bean.getClass(), new Annotation[] { feats },
                 MediaType.APPLICATION_JSON_TYPE, null, out);
-        assertEquals("{\"Bean\":{\"a\":3}}", out.toString("UTF-8"));
+        assertEquals("<Bean><Bean><a>3</a></Bean></Bean>", out.toString("UTF-8"));
 
         // but without, not:
         out.reset();
         prov.writeTo(bean, bean.getClass(), bean.getClass(), new Annotation[] { },
                 MediaType.APPLICATION_JSON_TYPE, null, out);
-        assertEquals("{\"a\":3}", out.toString("UTF-8"));
+        assertEquals("<Bean><a>3</a></Bean>", out.toString("UTF-8"));
     }
 
     public void testWriteConfigsViaBundle() throws Exception
@@ -77,7 +77,7 @@ public class TestJacksonFeatures extends JaxrsTestBase
         // should still enable root-wrapping
         prov.writeTo(bean, bean.getClass(), bean.getClass(), m.getAnnotations(),
                 MediaType.APPLICATION_JSON_TYPE, null, out);
-        assertEquals("{\"Bean\":{\"a\":3}}", out.toString("UTF-8"));
+        assertEquals("<Bean><Bean><a>3</a></Bean></Bean>", out.toString("UTF-8"));
     }
     
     // [Issue-2], deserialization
@@ -94,7 +94,7 @@ public class TestJacksonFeatures extends JaxrsTestBase
         Object ob = prov.readFrom(raw, raw,
                 new Annotation[] { feats },
                 MediaType.APPLICATION_JSON_TYPE, null,
-                new ByteArrayInputStream("{ \"foobar\" : 3 }".getBytes("UTF-8")));
+                new ByteArrayInputStream("<Bean><foobar>3</foobar></Bean>".getBytes("UTF-8")));
         assertNotNull(ob);
 
         // but without setting, get the exception
@@ -102,7 +102,7 @@ public class TestJacksonFeatures extends JaxrsTestBase
             prov.readFrom(raw, raw,
                     new Annotation[] { },
                     MediaType.APPLICATION_JSON_TYPE, null,
-                    new ByteArrayInputStream("{ \"foobar\" : 3 }".getBytes("UTF-8")));
+                    new ByteArrayInputStream("<Bean><foobar>3</foobar></Bean>".getBytes("UTF-8")));
             fail("Should have caught an exception");
         } catch (JsonMappingException e) {
             verifyException(e, "Unrecognized field");
