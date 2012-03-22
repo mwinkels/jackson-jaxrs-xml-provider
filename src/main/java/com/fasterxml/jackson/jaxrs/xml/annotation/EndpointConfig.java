@@ -49,8 +49,7 @@ public class EndpointConfig
             .initReader(mapper);
     }
 
-    public static EndpointConfig forWriting(ObjectMapper mapper, Annotation[] annotations,
-            String defaultJsonpMethod)
+    public static EndpointConfig forWriting(ObjectMapper mapper, Annotation[] annotations)
     {
         EndpointConfig config =  new EndpointConfig();
         return config

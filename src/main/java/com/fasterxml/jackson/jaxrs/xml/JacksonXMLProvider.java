@@ -16,6 +16,7 @@ import javax.ws.rs.ext.*;
 import com.fasterxml.jackson.core.*;
 import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.databind.util.LRUMap;
+import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.fasterxml.jackson.jaxrs.xml.annotation.EndpointConfig;
 import com.fasterxml.jackson.jaxrs.xml.cfg.MapperConfigurator;
 import com.fasterxml.jackson.jaxrs.xml.util.AnnotationBundleKey;
@@ -31,7 +32,7 @@ import com.fasterxml.jackson.jaxrs.xml.util.ClassKey;
  * <ul>
  *  <li>By explicitly passing mapper to use in constructor
  *  <li>By explictly setting mapper to use by {@link #setMapper}
- *  <li>By defining JAX-RS <code>Provider</code> that returns {@link ObjectMapper}s.
+ *  <li>By defining JAX-RS <code>Provider</code> that returns {@link XmlMapper}s.
  *  <li>By doing none of above, in which case a default mapper instance is
  *     constructed (and configured if configuration methods are called)
  * </ul>
@@ -52,8 +53,8 @@ import com.fasterxml.jackson.jaxrs.xml.util.ClassKey;
  * @author Tatu Saloranta
  */
 @Provider
-@Consumes({MediaType.APPLICATION_JSON, "text/json"})
-@Produces({MediaType.APPLICATION_JSON, "text/json"})
+@Consumes({MediaType.TEXT_XML, MediaType.APPLICATION_XML})
+@Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML})
 public class JacksonXMLProvider
     implements
         MessageBodyReader<Object>,
@@ -124,13 +125,13 @@ public class JacksonXMLProvider
      */
 
     /**
-     * Cache for resolved endpoint configurations when reading JSON data
+     * Cache for resolved endpoint configurations when reading XML
      */
     protected final LRUMap<AnnotationBundleKey, EndpointConfig> _readers
         = new LRUMap<AnnotationBundleKey, EndpointConfig>(16, 120);
 
     /**
-     * Cache for resolved endpoint configurations when writing JSON data
+     * Cache for resolved endpoint configurations when writing XML
      */
     protected final LRUMap<AnnotationBundleKey, EndpointConfig> _writers
         = new LRUMap<AnnotationBundleKey, EndpointConfig>(16, 120);
@@ -143,7 +144,7 @@ public class JacksonXMLProvider
     
     /**
      * Helper object used for encapsulating configuration aspects
-     * of {@link ObjectMapper}
+     * of {@link XmlMapper}
      */
     protected final MapperConfigurator _mapperConfig;
 
@@ -151,14 +152,6 @@ public class JacksonXMLProvider
      * Set of types (classes) that provider should ignore for data binding
      */
     protected HashSet<ClassKey> _cfgCustomUntouchables;
-
-    /**
-     * JSONP function name to use for automatic JSONP wrapping, if any;
-     * if null, no JSONP wrapping is done.
-     * Note that this is the default value that can be overridden on
-     * per-endpoint basis.
-     */
-    protected String _jsonpFunctionName;
     
     /*
     /**********************************************************
@@ -168,7 +161,7 @@ public class JacksonXMLProvider
 
     /**
      * Injectable context object used to locate configured
-     * instance of {@link ObjectMapper} to use for actual
+     * instance of {@link XmlMapper} to use for actual
      * serialization.
      */
     @Context
@@ -220,7 +213,7 @@ public class JacksonXMLProvider
         this(null, annotationsToUse);
     }
 
-    public JacksonXMLProvider(ObjectMapper mapper)
+    public JacksonXMLProvider(XmlMapper mapper)
     {
         this(mapper, BASIC_ANNOTATIONS);
     }
@@ -233,7 +226,7 @@ public class JacksonXMLProvider
      * @param annotationsToUse Sets of annotations (Jackson, JAXB) that provider should
      *   support
      */
-    public JacksonXMLProvider(ObjectMapper mapper, Annotations[] annotationsToUse)
+    public JacksonXMLProvider(XmlMapper mapper, Annotations[] annotationsToUse)
     {
         _mapperConfig = new MapperConfigurator(mapper, annotationsToUse);
     }
@@ -279,11 +272,11 @@ public class JacksonXMLProvider
     }
     
     /**
-     * Method that can be used to directly define {@link ObjectMapper} to use
+     * Method that can be used to directly define {@link XmlMapper} to use
      * for serialization and deserialization; if null, will use the standard
      * provider discovery from context instead. Default setting is null.
      */
-    public void setMapper(ObjectMapper m) {
+    public void setMapper(XmlMapper m) {
         _mapperConfig.setMapper(m);
     }
 
@@ -363,10 +356,6 @@ public class JacksonXMLProvider
         }
         _cfgCustomUntouchables.add(new ClassKey(type));
     }
-
-    public void setJSONPFunctionName(String fname) {
-    	this._jsonpFunctionName = fname;
-    }
     
     /*
     /**********************************************************
@@ -379,7 +368,7 @@ public class JacksonXMLProvider
      * values of given type (and media type) can be deserialized by
      * this provider.
      * Implementation will first check that expected media type is
-     * a JSON type (via call to {@link #isJsonType}; then verify
+     * an XML type (via call to {@link #isXMLType}; then verify
      * that type is not one of "untouchable" types (types we will never
      * automatically handle), and finally that there is a deserializer
      * for type (iff {@link #checkCanDeserialize} has been called with
@@ -387,37 +376,19 @@ public class JacksonXMLProvider
      */
     public boolean isReadable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType)
     {
-        if (!isJsonType(mediaType)) {
+        if (!isXMLType(mediaType) || !isReadableType(type)) {
             return false;
         }
-
-        /* Ok: looks like we must weed out some core types here; ones that
-         * make no sense to try to bind from JSON:
-         */
-        if (_untouchables.contains(new ClassKey(type))) {
-            return false;
-        }
-        // and there are some other abstract/interface types to exclude too:
-        for (Class<?> cls : _unreadableClasses) {
-            if (cls.isAssignableFrom(type)) {
-                return false;
-            }
-        }
-        // as well as possible custom exclusions
-        if (_containedIn(type, _cfgCustomUntouchables)) {
-            return false;
-        }
-
-        // Finally: if we really want to verify that we can serialize, we'll check:
+        // if we really want to verify that we can serialize, we'll check:
         if (_cfgCheckCanSerialize) {
-            ObjectMapper mapper = locateMapper(type, mediaType);
+            XmlMapper mapper = locateMapper(type, mediaType);
             if (!mapper.canDeserialize(mapper.constructType(type))) {
                 return false;
             }
         }
         return true;
     }
-    
+
     /**
      * Method that JAX-RS container calls to deserialize given value.
      */
@@ -431,7 +402,7 @@ public class JacksonXMLProvider
         }
         // not yet resolved (or not cached any more)? Resolve!
         if (endpoint == null) {
-            ObjectMapper mapper = locateMapper(type, mediaType);
+            XmlMapper mapper = locateMapper(type, mediaType);
             endpoint = EndpointConfig.forReading(mapper, annotations);
             // and cache for future reuse
             synchronized (_readers) {
@@ -470,7 +441,7 @@ public class JacksonXMLProvider
      * given value (of specified type) can be serialized by
      * this provider.
      * Implementation will first check that expected media type is
-     * a JSON type (via call to {@link #isJsonType}; then verify
+     * an XML type (via call to {@link #isXMLType}; then verify
      * that type is not one of "untouchable" types (types we will never
      * automatically handle), and finally that there is a serializer
      * for type (iff {@link #checkCanSerialize} has been called with
@@ -478,27 +449,9 @@ public class JacksonXMLProvider
      */
     public boolean isWriteable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType)
     {
-        if (!isJsonType(mediaType)) {
+        if (!isXMLType(mediaType) || !isWritableType(type)) {
             return false;
         }
-
-        /* Ok: looks like we must weed out some core types here; ones that
-         * make no sense to try to bind from JSON:
-         */
-        if (_untouchables.contains(new ClassKey(type))) {
-            return false;
-        }
-        // but some are interface/abstract classes, so
-        for (Class<?> cls : _unwritableClasses) {
-            if (cls.isAssignableFrom(type)) {
-                return false;
-            }
-        }
-        // and finally, may have additional custom types to exclude
-        if (_containedIn(type, _cfgCustomUntouchables)) {
-            return false;
-        }
-
         // Also: if we really want to verify that we can deserialize, we'll check:
         if (_cfgCheckCanSerialize) {
             if (!locateMapper(type, mediaType).canSerialize(type)) {
@@ -522,9 +475,8 @@ public class JacksonXMLProvider
         }
         // not yet resolved (or not cached any more)? Resolve!
         if (endpoint == null) {
-            ObjectMapper mapper = locateMapper(type, mediaType);
-            endpoint = EndpointConfig.forWriting(mapper, annotations,
-                    this._jsonpFunctionName);
+            XmlMapper mapper = locateMapper(type, mediaType);
+            endpoint = EndpointConfig.forWriting(mapper, annotations);
             // and cache for future reuse
             synchronized (_writers) {
                 _writers.put(key.immutableKey(), endpoint);
@@ -586,38 +538,89 @@ public class JacksonXMLProvider
     
     /*
     /**********************************************************
-    /* Public helper methods
+    /* Overridable helper methods
     /**********************************************************
      */
 
     /**
      * Helper method used to check whether given media type
-     * is JSON type or sub type.
+     * is XML type or sub type.
      * Current implementation essentially checks to see whether
-     * {@link MediaType#getSubtype} returns "json" or something
-     * ending with "+json".
+     * {@link MediaType#getSubtype} returns "xml" or something
+     * ending with "+xml".
      */
-    protected boolean isJsonType(MediaType mediaType)
+    protected boolean isXMLType(MediaType mediaType)
     {
         /* As suggested by Stephen D, there are 2 ways to check: either
-         * being as inclusive as possible (if subtype is "json"), or
-         * exclusive (major type "application", minor type "json").
+         * being as inclusive as possible (if subtype is "xml"), or
+         * exclusive (major type "application", minor type "xml").
          * Let's start with inclusive one, hard to know which major
          * types we should cover aside from "application".
          */
         if (mediaType != null) {
-            // Ok: there are also "xxx+json" subtypes, which count as well
+            // Ok: there are also "xxx+xml" subtypes, which count as well
             String subtype = mediaType.getSubtype();
-            return "json".equalsIgnoreCase(subtype) || subtype.endsWith("+json");
+            return "xml".equalsIgnoreCase(subtype) || subtype.endsWith("+xml");
         }
         /* Not sure if this can happen; but it seems reasonable
-         * that we can at least produce json without media type?
+         * that we can at least produce XML without media type?
          */
+        return true;
+    }
+    
+    /**
+     * Helper method called to see if given type is readable, that is,
+     * acceptable Java type to bind from XML
+     */
+    protected boolean isReadableType(Class<?> type)
+    {
+        /* Ok: looks like we must weed out some core types here; ones that
+         * make no sense to try to bind from XML
+         */
+        if (_untouchables.contains(new ClassKey(type))) {
+            return false;
+        }
+        // and there are some other abstract/interface types to exclude too:
+        for (Class<?> cls : _unreadableClasses) {
+            if (cls.isAssignableFrom(type)) {
+                return false;
+            }
+        }
+        // as well as possible custom exclusions
+        if (_containedIn(type, _cfgCustomUntouchables)) {
+            return false;
+        }
+        return true;
+    }
+
+    
+    /**
+     * Helper method called to see if given type is writable, that is,
+     * acceptable Java type to write out as XML.
+     */
+    protected boolean isWritableType(Class<?> type)
+    {
+        /* Ok: looks like we must weed out some core types here; ones that
+         * make no sense to try to write out as XML:
+         */
+        if (_untouchables.contains(new ClassKey(type))) {
+            return false;
+        }
+        // but some are interface/abstract classes, so
+        for (Class<?> cls : _unwritableClasses) {
+            if (cls.isAssignableFrom(type)) {
+                return false;
+            }
+        }
+        // and finally, may have additional custom types to exclude
+        if (_containedIn(type, _cfgCustomUntouchables)) {
+            return false;
+        }
         return true;
     }
 
     /**
-     * Method called to locate {@link ObjectMapper} to use for serialization
+     * Method called to locate {@link XmlMapper} to use for serialization
      * and deserialization. If an instance has been explicitly defined by
      * {@link #setMapper} (or non-null instance passed in constructor), that
      * will be used. 
@@ -636,21 +639,21 @@ public class JacksonXMLProvider
      *   not used by this method,
      *   but will be passed to {@link ContextResolver} as is.
      */
-    public ObjectMapper locateMapper(Class<?> type, MediaType mediaType)
+    public XmlMapper locateMapper(Class<?> type, MediaType mediaType)
     {
         // First: were we configured with a specific instance?
-        ObjectMapper m = _mapperConfig.getConfiguredMapper();
+        XmlMapper m = _mapperConfig.getConfiguredMapper();
         if (m == null) {
             // If not, maybe we can get one configured via context?
             if (_providers != null) {
-                ContextResolver<ObjectMapper> resolver = _providers.getContextResolver(ObjectMapper.class, mediaType);
+                ContextResolver<XmlMapper> resolver = _providers.getContextResolver(XmlMapper.class, mediaType);
                 /* Above should work as is, but due to this bug
                  *   [https://jersey.dev.java.net/issues/show_bug.cgi?id=288]
                  * in Jersey, it doesn't. But this works until resolution of
                  * the issue:
                  */
                 if (resolver == null) {
-                    resolver = _providers.getContextResolver(ObjectMapper.class, null);
+                    resolver = _providers.getContextResolver(XmlMapper.class, null);
                 }
                 if (resolver != null) {
                     m = resolver.getContext(type);

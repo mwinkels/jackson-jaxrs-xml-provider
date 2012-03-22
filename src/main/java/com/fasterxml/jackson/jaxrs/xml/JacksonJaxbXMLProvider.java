@@ -5,7 +5,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.ext.Provider;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 
 /**
  * JSON content type provider automatically configured to use both Jackson
@@ -22,8 +22,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * in sync if changed.
  */
 @Provider
-@Consumes({MediaType.APPLICATION_JSON, "text/json"})
-@Produces({MediaType.APPLICATION_JSON, "text/json"})
+@Consumes({MediaType.TEXT_XML, MediaType.APPLICATION_XML})
+@Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML})
 public class JacksonJaxbXMLProvider extends JacksonXMLProvider {
     /**
      * Default annotation sets to use, if not explicitly defined during
@@ -57,7 +57,7 @@ public class JacksonJaxbXMLProvider extends JacksonXMLProvider {
      * like serializer/deserializer factories that have been configured)
      * is to be used.
      */
-    public JacksonJaxbXMLProvider(ObjectMapper mapper, Annotations[] annotationsToUse)
+    public JacksonJaxbXMLProvider(XmlMapper mapper, Annotations[] annotationsToUse)
     {
         super(mapper, annotationsToUse);
     }

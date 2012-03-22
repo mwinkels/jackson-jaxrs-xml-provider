@@ -8,7 +8,7 @@ import javax.ws.rs.ext.Provider;
 
 /**
  * Implementation if {@link ExceptionMapper} to send down a "400 Bad Request"
- * response in the event that unmappable JSON is received.
+ * response in the event that unprocessable XML is received.
  */
 @Provider
 public class JsonMappingExceptionMapper implements ExceptionMapper<JsonMappingException> {

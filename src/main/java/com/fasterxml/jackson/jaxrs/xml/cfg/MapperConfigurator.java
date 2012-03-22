@@ -6,12 +6,16 @@ import com.fasterxml.jackson.core.*;
 
 import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
+
+import com.fasterxml.jackson.dataformat.xml.XmlMapper;
+
 import com.fasterxml.jackson.jaxrs.xml.Annotations;
+
 import com.fasterxml.jackson.module.jaxb.JaxbAnnotationIntrospector;
 
 /**
  * Helper class used to encapsulate details of configuring an
- * {@link ObjectMapper} instance to be used for data binding, as
+ * {@link XmlMapper} instance to be used for data binding, as
  * well as accessing it.
  */
 public class MapperConfigurator
@@ -22,7 +26,7 @@ public class MapperConfigurator
      * If defined (explicitly or implicitly) it will be used, instead
      * of using provider-based lookup.
      */
-    protected ObjectMapper _mapper;
+    protected XmlMapper _mapper;
 
     /**
      * If no mapper was specified when constructed, and no configuration
@@ -30,7 +34,7 @@ public class MapperConfigurator
      * between default mapper and regular one is that default mapper
      * is only used if no mapper is found via provider lookup.
      */
-    protected ObjectMapper _defaultMapper;
+    protected XmlMapper _defaultMapper;
 
     /**
      * Annotations set to use by default; overridden by explicit call
@@ -50,25 +54,25 @@ public class MapperConfigurator
     /**********************************************************
      */
     
-    public MapperConfigurator(ObjectMapper mapper, Annotations[] defAnnotations)
+    public MapperConfigurator(XmlMapper mapper, Annotations[] defAnnotations)
     {
         _mapper = mapper;
         _defaultAnnotationsToUse = defAnnotations;
     }
 
     /**
-     * Method that locates, configures and returns {@link ObjectMapper} to use
+     * Method that locates, configures and returns {@link XmlMapper} to use
      */
-    public synchronized ObjectMapper getConfiguredMapper() {
+    public synchronized XmlMapper getConfiguredMapper() {
         /* important: should NOT call mapper(); needs to return null
          * if no instance has been passed or constructed
          */
         return _mapper;
     }
 
-    public synchronized ObjectMapper getDefaultMapper() {
+    public synchronized XmlMapper getDefaultMapper() {
         if (_defaultMapper == null) {
-            _defaultMapper = new ObjectMapper();
+            _defaultMapper = new XmlMapper();
             _setAnnotations(_defaultMapper, _defaultAnnotationsToUse);
         }
         return _defaultMapper;
@@ -80,7 +84,7 @@ public class MapperConfigurator
      ***********************************************************
       */
 
-    public synchronized void setMapper(ObjectMapper m) {
+    public synchronized void setMapper(XmlMapper m) {
         _mapper = m;
     }
 
@@ -115,16 +119,16 @@ public class MapperConfigurator
      * mapper (constructing an instance if one didn't yet exit), and return
      * that mapper.
      */
-    protected ObjectMapper mapper()
+    protected XmlMapper mapper()
     {
         if (_mapper == null) {
-            _mapper = new ObjectMapper();
+            _mapper = new XmlMapper();
             _setAnnotations(_mapper, _defaultAnnotationsToUse);
         }
         return _mapper;
     }
 
-    protected void _setAnnotations(ObjectMapper mapper, Annotations[] annotationsToUse)
+    protected void _setAnnotations(XmlMapper mapper, Annotations[] annotationsToUse)
     {
         AnnotationIntrospector intr;
         if (annotationsToUse == null || annotationsToUse.length == 0) {

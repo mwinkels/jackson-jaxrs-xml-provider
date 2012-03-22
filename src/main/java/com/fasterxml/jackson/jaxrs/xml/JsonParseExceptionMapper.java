@@ -8,7 +8,7 @@ import javax.ws.rs.ext.Provider;
 
 /**
  * Implementation of {@link ExceptionMapper} to send down a "400 Bad Request"
- * in the event unparsable JSON is received.
+ * in the event unprocessable XML is received.
  */
 @Provider
 public class JsonParseExceptionMapper implements ExceptionMapper<JsonParseException> {

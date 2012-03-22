@@ -23,7 +23,7 @@ public class TestUntouchables
          // Some users of JacksonJsonProvider override this method;
          // changing to "private" would regress them.
          @Override
-         protected boolean isJsonType(MediaType mediaType) { return super.isJsonType(mediaType); }
+         protected boolean isXMLType(MediaType mediaType) { return super.isXMLType(mediaType); }
     }
 
     /*
