@@ -191,6 +191,7 @@ javax.ws.rs
 ,com.fasterxml.jackson.databind.introspect
 ,com.fasterxml.jackson.databind.type
 ,com.fasterxml.jackson.databind.util
+,com.fasterxml.jackson.dataformat.xml
 ,com.fasterxml.jackson.module.jaxb
 </Import-Package>
               <Private-Package>
