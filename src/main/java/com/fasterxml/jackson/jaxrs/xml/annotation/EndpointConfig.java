@@ -60,7 +60,9 @@ public class EndpointConfig
     
     protected EndpointConfig add(Annotation[] annotations, boolean forWriting)
     {
-        for (Annotation annotation : annotations) {
+    	// Same as [issue-10] with JSON provider; must check for null:
+    	if (annotations != null) {
+    	  for (Annotation annotation : annotations) {
             Class<?> type = annotation.annotationType();
             if (type == JsonView.class) {
                 // Can only use one view; but if multiple defined, use first (no exception)
@@ -86,6 +88,7 @@ public class EndpointConfig
                     add(type.getAnnotations(), forWriting);
                 }
             }
+          }
         }
         return this;
     }
