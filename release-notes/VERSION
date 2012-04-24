@@ -1,14 +1,15 @@
 Version: 2.0.1
 
 Release date:
-  xx-Apr-2012
+  23-Apr-2012
 
 Description:
   Patch release for 2.0
 
 Fixes:
 
-* Changed 'jaxrs-311' dependeny from 'compile' to 'provided'
+* Changed 'jaxrs-311' dependency from 'compile' to 'provided'
+* Now compiles on 1.5
 
 ------------------------------------------------------------------------
 === History: ===
