@@ -15,10 +15,10 @@ public class TestUntouchables
     extends JaxrsTestBase
 {
     /**
-     * Test type added for [JACKSON-460]... just to ensure that "isJsonType"
+     * Test type added for [JACKSON-460]... just to ensure that "isXMLType"
      * remains overridable.
      */
-    public static class MyJacksonJsonProvider extends JacksonXMLProvider {
+    public static class MyJacksonProvider extends JacksonXMLProvider {
          // ensure isJsonType remains "protected" � this is a compile-time check.
          // Some users of JacksonJsonProvider override this method;
          // changing to "private" would regress them.
@@ -42,8 +42,9 @@ public class TestUntouchables
         // but some types should be ignored (set of ignorable may change over time tho!)
         assertFalse(prov.isWriteable(StreamingOutput.class, StreamingOutput.class, null, null));
 
-        // and then on-the-fence things
-        assertTrue(prov.isReadable(String.class, getClass(), null, null));
+        // and then on-the-fence things (see [Issue-1])
+        assertFalse(prov.isReadable(String.class, getClass(), null, null));
+        assertFalse(prov.isReadable(byte[].class, getClass(), null, null));
     }
 
     public void testCustomUntouchables() throws Exception

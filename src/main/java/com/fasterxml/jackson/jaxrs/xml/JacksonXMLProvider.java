@@ -46,7 +46,7 @@ import com.fasterxml.jackson.jaxrs.xml.util.ClassKey;
  * is called: if so, Provider-based introspection is <b>NOT</b> used, but the
  * resulting Mapper is used as configured.
  *<p>
- * Note: version 1.3 added a sub-class ({@link JacksonJaxbXMLProvider}) which
+ * Note that there is also a sub-class -- ({@link JacksonJaxbXMLProvider}) -- that
  * is configured by default to use both Jackson and JAXB annotations for configuration
  * (base class when used as-is defaults to using just Jackson annotations)
  *
@@ -90,11 +90,13 @@ public class JacksonXMLProvider
         // then some primitive types
         _untouchables.add(new ClassKey(char[].class));
 
-        /* 28-Jan-2012, tatu: 1.x excluded some additional types;
-         *   but let's relax these a bit:
+        /* 27-Apr-2012, tatu: Grrrh. Looks like we need to consider these
+         *   untouchables, still, to allow users to access "raw" responses
+         *   if and as necessary. Latter is unfortunate in a way as it
+         *   prevents use of automatic base64 decoding but...
          */
-        //_untouchables.add(new ClassKey(String.class));
-        //_untouchables.add(new ClassKey(byte[].class));
+        _untouchables.add(new ClassKey(String.class));
+        _untouchables.add(new ClassKey(byte[].class));
 
         // Then core JAX-RS things
         _untouchables.add(new ClassKey(StreamingOutput.class));

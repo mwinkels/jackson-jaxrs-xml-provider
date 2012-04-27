@@ -10,7 +10,6 @@ import com.fasterxml.jackson.core.*;
 public abstract class JaxrsTestBase
     extends junit.framework.TestCase
 {
-
     /*
     /**********************************************************
     /* Additional assertion methods
