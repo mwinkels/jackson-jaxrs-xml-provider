@@ -1,19 +1,24 @@
-Version: 2.0.1
+Version: 2.0.2
 
 Release date:
-  23-Apr-2012
+  14-May-2012
 
 Description:
-  Patch release for 2.0
+  Another patch release for 2.0: now functional changes;
+  improved Maven build.
+
+Fixes:
+
+------------------------------------------------------------------------
+=== History: ===
+------------------------------------------------------------------------
+
+2.0.1 [23-Apr-2012]
 
 Fixes:
 
 * Changed 'jaxrs-311' dependency from 'compile' to 'provided'
 * Now compiles on 1.5
-
-------------------------------------------------------------------------
-=== History: ===
-------------------------------------------------------------------------
 
 2.0.0 [25-Mar-2012]
 
