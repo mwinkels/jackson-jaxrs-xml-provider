@@ -1,17 +1,19 @@
-Version: 2.0.2
+Version: 2.0.3
 
 Release date:
-  14-May-2012
+  15-Jun-2012
 
 Description:
-  Another patch release for 2.0: now functional changes;
-  improved Maven build.
-
-Fixes:
+  Another patch release for 2.0: uses newer versions of
+  XML data format, JAXB annotations support.
 
 ------------------------------------------------------------------------
 === History: ===
 ------------------------------------------------------------------------
+
+2.0.2 [14-May-2012]
+
+* No changes
 
 2.0.1 [23-Apr-2012]
 
