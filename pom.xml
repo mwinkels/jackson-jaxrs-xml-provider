@@ -23,7 +23,7 @@
   </parent>
   <groupId>com.fasterxml.jackson.jaxrs</groupId>
   <artifactId>jackson-jaxrs-xml-provider</artifactId>
-  <version>2.1.0-SNAPSHOT</version>
+  <version>2.0.7-SNAPSHOT</version>
   <name>Jackson-JAXRS-XML_Provider</name>
   <description>Functionality to handle XML input/output for JAX-RS implementations (like Jersey and RESTeasy) using standard Jackson data binding with XML format backend (parser, generator) on top of Stax API.
   </description>
@@ -68,24 +68,24 @@ ${project.groupId}.xml.util;version=${project.version}
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-core</artifactId>
-      <version>2.1.0</version>
+      <version>2.0.6</version>
     </dependency>
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-databind</artifactId>
-      <version>2.1.0</version>
+      <version>2.0.6</version>
     </dependency>
     <!-- Also, XML serialization/deserialization... -->
     <dependency>
       <groupId>com.fasterxml.jackson.dataformat</groupId>
       <artifactId>jackson-dataformat-xml</artifactId>
-      <version>2.1.0</version>
+      <version>2.0.6</version>
     </dependency>
     <!-- also need JAXB annotation support -->
     <dependency> 
       <groupId>com.fasterxml.jackson.module</groupId>
       <artifactId>jackson-module-jaxb-annotations</artifactId>
-      <version>2.1.0</version>
+      <version>2.0.6</version>
     </dependency>
 
     <!-- and we need JAX-RS annotations as well; but usually provided by container
