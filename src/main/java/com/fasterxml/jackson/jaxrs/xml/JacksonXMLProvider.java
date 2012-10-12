@@ -412,7 +412,14 @@ public class JacksonXMLProvider
             }
         }
         ObjectReader reader = endpoint.getReader();
-        JsonParser jp = reader.getJsonFactory().createJsonParser(entityStream);
+        // Fix for [Issue#4]: note, can not try to advance parser, XML parser complains
+        PushbackInputStream wrappedStream = new PushbackInputStream(entityStream);
+        int firstByte = wrappedStream.read(); 
+        if (firstByte == -1) {
+            return null;
+        }
+        wrappedStream.unread(firstByte);
+        JsonParser jp = reader.getJsonFactory().createJsonParser(wrappedStream);
         return reader.withType(genericType).readValue(jp);
     }
 

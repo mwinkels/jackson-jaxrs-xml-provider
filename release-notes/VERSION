@@ -6,6 +6,10 @@ Release date:
 Description:
   New minor version based on jackson core 2.1
 
+Fixes:
+
+- [Issue#4] Exception on empty content, should return null.
+
 ------------------------------------------------------------------------
 === History: ===
 ------------------------------------------------------------------------
