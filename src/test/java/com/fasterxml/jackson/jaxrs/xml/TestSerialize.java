@@ -61,6 +61,7 @@ public class TestSerialize extends JaxrsTestBase
         prov.writeTo(msgs, Messages.class, Messages.class, new Annotation[0], mt, null, out);
 
         String xml = out.toString("UTF-8");
+
         assertEquals("<m><pageNumber>3</pageNumber><messages><messages><text>foo</text></messages>"
                 +"<messages><text>bar</text></messages></messages></m>",
                 xml);

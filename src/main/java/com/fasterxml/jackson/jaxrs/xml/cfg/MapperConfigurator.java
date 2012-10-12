@@ -7,8 +7,10 @@ import com.fasterxml.jackson.core.*;
 import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
 
+import com.fasterxml.jackson.dataformat.xml.JacksonXmlAnnotationIntrospector;
 import com.fasterxml.jackson.dataformat.xml.JacksonXmlModule;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
+import com.fasterxml.jackson.dataformat.xml.jaxb.XmlJaxbAnnotationIntrospector;
 
 import com.fasterxml.jackson.jaxrs.xml.Annotations;
 
@@ -171,20 +173,25 @@ public class MapperConfigurator
 
     protected AnnotationIntrospector _resolveIntrospector(Annotations ann)
     {
+        /* 11-Oct-2012, tatu: IMPORTANT: we MUST override choices here,
+         *   since XML module provides extended versions of BOTH standard
+         *   AnnotationIntrospectors.
+         */
+        
         switch (ann) {
         case JACKSON:
-            return new JacksonAnnotationIntrospector();
+            return new JacksonXmlAnnotationIntrospector();
         case JAXB:
             /* For this, need to use indirection just so that error occurs
              * when we get here, and not when this class is being loaded
              */
             try {
                 if (_jaxbIntrospectorClass == null) {
-                    _jaxbIntrospectorClass = JaxbAnnotationIntrospector.class;
+                    _jaxbIntrospectorClass = XmlJaxbAnnotationIntrospector.class;
                 }
                 return _jaxbIntrospectorClass.newInstance();
             } catch (Exception e) {
-                throw new IllegalStateException("Failed to instantiate JaxbAnnotationIntrospector: "+e.getMessage(), e);
+                throw new IllegalStateException("Failed to instantiate XmlJaxbAnnotationIntrospector: "+e.getMessage(), e);
             }
         default:
             throw new IllegalStateException(); 
