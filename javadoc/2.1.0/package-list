@@ -1,0 +1,4 @@
+com.fasterxml.jackson.jaxrs.xml
+com.fasterxml.jackson.jaxrs.xml.annotation
+com.fasterxml.jackson.jaxrs.xml.cfg
+com.fasterxml.jackson.jaxrs.xml.util
