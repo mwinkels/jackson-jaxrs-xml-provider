@@ -14,11 +14,13 @@ Module is fully usable. It depends on Jackson 2.0 API.
 
 To use this extension on Maven-based projects, use following dependency:
 
-    <dependency>
-      <groupId>com.fasterxml.jackson.jaxrs</groupId>
-      <artifactId>jackson-jaxrs-xml-provider</artifactId>
-      <version>2.1.1</version>
-    </dependency>
+```xml
+<dependency>
+  <groupId>com.fasterxml.jackson.jaxrs</groupId>
+  <artifactId>jackson-jaxrs-xml-provider</artifactId>
+  <version>2.1.1</version>
+</dependency>
+```
 
 (or whatever version is most up-to-date at the moment)
 
