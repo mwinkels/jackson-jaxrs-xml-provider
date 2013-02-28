@@ -1,12 +1,14 @@
 Project: jackson-jaxrs-xml-provider
-Version: 2.1.4 (26-Feb-2013)
+Version: 2.1.5 (xx-xxx-2013)
 
-No changes except for dependencies
+* [JACKSON-891]: AnnotationBundleKey caching was not working
+ (reported by Chris H)
 
 ------------------------------------------------------------------------
 === History: ===
 ------------------------------------------------------------------------
 
+2.1.4 (26-Feb-2013)
 2.1.3 (31-Jan-2013)
 2.1.2 (05-Dec-2012)
 2.1.1 (11-Nov-2012)
